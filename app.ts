@@ -3,7 +3,15 @@ import { MovieApp } from './movie-app';
 async function main(): Promise<void> {
   const app = new MovieApp();
 
-  await app.loadMovies(1, 10); // Fetches first page of 10 movies
+  await app.loadMovies(1, 10);
+
+  const moviesPerPage = app.getPageSize();
+
+  const currentPage = app.getCurrentPage();
+  const totalPages = Math.ceil(app.getMovies().length / moviesPerPage);
+  if (currentPage < totalPages) {
+    await app.loadMovies(currentPage + 1, moviesPerPage);
+  }
 
   const movies: Readonly<Movie[]> = app.getPaginatedMovies();
 
@@ -23,8 +31,13 @@ async function main(): Promise<void> {
   const movieToComment = movies[1];
   app.addComment(movieToComment, 'Great movie!');
   app.addComment(movieToComment, 'Highly recommended.');
-  app.goToNextPage();
+
+  if (currentPage < totalPages) {
+    app.goToNextPage();
+  }
+
   app.goToPage(3);
+
   app.setPageSize(5);
 }
 
